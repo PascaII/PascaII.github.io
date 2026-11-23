@@ -1,0 +1,284 @@
+/* Georgia scaled to Newsreader's width at body size, so text barely reflows when the web font
+   arrives (the mobile intro wraps beside the portrait and would otherwise shift) */
+@font-face {
+  font-family: 'Newsreader Fallback';
+  src: local('Georgia');
+  size-adjust: 93%;
+}
+
+:root {
+  color-scheme: light dark;
+  --paper: light-dark(#f4f2ec, #121210);
+  --ink: light-dark(#1b1a17, #e9e6dd);
+  --mute: light-dark(#6b675e, #9a958b);
+  --soft: color-mix(in oklab, var(--ink) 70%, var(--mute));
+  --rule: light-dark(#cfcabd, #3a3832);
+  --accent: light-dark(#2456a6, #9db8e6);
+  --underline: color-mix(in oklab, var(--ink) 30%, transparent);
+  --serif: 'Newsreader Variable', 'Newsreader Fallback', Georgia, 'Times New Roman', serif;
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  /* type scale: body, secondary text, section headings, and one size for all monospace */
+  --text: 1.0625rem;
+  --text-small: 0.9375rem;
+  --text-heading: 1.25rem;
+  --text-mono: 0.75rem;
+  /* space above the page content; also where the sticky portrait rests, so it never shifts on scroll */
+  --page-top: clamp(2.5rem, 9vh, 6rem);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0 1.25rem;
+  background: var(--paper);
+  color: var(--ink);
+  font: var(--text)/1.55 var(--serif);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: underline 1px var(--underline);
+  text-underline-offset: 0.2em;
+}
+a:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+/* org names are secondary links: italic marks them, the underline appears on hover */
+.org a:not(:hover, :focus-visible) {
+  text-decoration-color: transparent;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.2rem, 5vw, 3rem);
+  font-weight: 450;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+h2 {
+  margin: 2.75rem 0 0.75rem;
+  font: italic 400 var(--text-heading)/1.2 var(--serif);
+}
+p {
+  margin: 0;
+}
+
+/* the portrait sits in the header after the role line; on wide screens the header's children
+   join the page grid so the portrait can take the left column for the whole page */
+.home {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  column-gap: clamp(2rem, 6vw, 5.5rem);
+  align-items: start;
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: var(--page-top) 0 2rem;
+}
+.home > *,
+.home > header > * {
+  grid-column: 2;
+}
+.home > header {
+  display: contents;
+}
+.home .portrait {
+  grid-column: 1;
+  grid-row: 1 / span 20;
+  position: sticky;
+  top: var(--page-top);
+}
+.portrait {
+  margin: 0;
+  color: var(--ink);
+}
+.portrait canvas,
+.portrait img {
+  display: block;
+  width: 100%;
+  max-width: 26rem;
+  height: auto;
+  margin-inline: auto;
+  touch-action: pan-y;
+}
+.role {
+  margin-top: 0.5rem;
+  font: var(--text-mono) var(--mono);
+  color: var(--mute);
+}
+.blurb {
+  margin-top: 1.25rem;
+  max-width: 34rem;
+}
+
+.page {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: var(--page-top) 0 2rem;
+}
+.page h1 {
+  margin-bottom: 2rem;
+}
+.back,
+.more {
+  font: var(--text-mono) var(--mono);
+}
+.back {
+  margin-bottom: 2rem;
+}
+.more {
+  margin-top: 1rem;
+}
+
+morph-icon svg {
+  margin-left: 0.4em;
+  vertical-align: -0.2em;
+}
+morph-icon[data-morph='back'] svg {
+  margin: 0 0.4em 0 0;
+}
+
+.rows {
+  display: grid;
+  gap: 0.95rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rows li {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: baseline;
+}
+.rows li > div:only-child {
+  grid-column: 1 / -1;
+}
+.when {
+  font: var(--text-mono) var(--mono);
+  white-space: nowrap;
+  color: var(--mute);
+  font-variant-numeric: tabular-nums;
+}
+.rows strong {
+  font-weight: 550;
+}
+.rows div > a {
+  font-weight: 550;
+}
+.org {
+  color: var(--soft);
+}
+.rows p {
+  color: var(--soft);
+  font-size: var(--text-small);
+  line-height: 1.45;
+}
+.rows .stack {
+  margin-top: 0.4rem;
+  font: var(--text-mono) var(--mono);
+  color: var(--mute);
+}
+/* keep a link's icon with its label */
+.stack a {
+  white-space: nowrap;
+}
+
+.graph .scroll {
+  overflow-x: auto;
+}
+.graph svg {
+  display: block;
+  width: 100%;
+  min-width: 36rem;
+  height: auto;
+  fill: currentColor;
+}
+.graph .scroll circle {
+  stroke: transparent; /* widens the hit area to the whole cell */
+}
+.graph .scroll circle:hover {
+  fill: var(--accent);
+  opacity: 1;
+}
+.graph text {
+  font: 8px var(--mono);
+  fill: var(--mute);
+}
+.graph .legend {
+  display: inline-block;
+  width: 3.4rem;
+  min-width: 0;
+  vertical-align: -0.15em;
+}
+.graph p {
+  margin-top: 0.6rem;
+  font: var(--text-mono) var(--mono);
+  color: var(--mute);
+}
+/* own line, so swapping in the hovered day never rewraps the caption */
+.graph .day {
+  display: block;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .portrait canvas {
+    animation: develop 0.9s ease-out;
+  }
+}
+@keyframes develop {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+  }
+}
+
+footer {
+  display: flex;
+  gap: 1.5rem;
+  max-width: 68rem;
+  margin: 3rem auto 0;
+  padding: 1.25rem 0 2rem;
+  border-top: 1px solid var(--rule);
+  flex-wrap: wrap;
+  align-items: baseline;
+  font: var(--text-mono) var(--mono);
+  color: var(--mute);
+}
+
+/* bigger tap area without moving the text */
+footer a {
+  padding-block: 0.35rem;
+}
+.updated {
+  margin-left: auto;
+}
+
+body:has(.page) footer {
+  max-width: 44rem;
+}
+
+/* narrow screens: one column, the portrait floats beside the intro */
+@media (max-width: 48rem) {
+  .home {
+    display: block;
+  }
+  .home > header {
+    display: flow-root;
+  }
+  .home .portrait {
+    position: static;
+    float: right;
+    width: clamp(6rem, 33vw, 8rem);
+    margin: 1.25rem 0 0.5rem 1rem;
+  }
+}

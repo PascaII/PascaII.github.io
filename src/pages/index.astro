@@ -1,0 +1,57 @@
+---
+import Base from '../layouts/Base.astro'
+import Rows from '../components/Rows.astro'
+import LinkIcon from '../components/LinkIcon.astro'
+import { me, experience, projects, recognition, education } from '../data'
+
+const linkedin = me.links.find((l) => l.label === 'LinkedIn')!
+const github = me.links.find((l) => l.label === 'GitHub')!
+
+const featured = projects
+  .filter((p) => p.featured)
+  .map((p) => ({ ...p, title: p.name }))
+  .sort((a, b) => b.when.localeCompare(a.when))
+---
+
+<Base>
+  <main class="home">
+    <header>
+      <h1>{me.name}</h1>
+      <p class="role">{me.role} · {me.location}</p>
+      <figure class="portrait">
+        <canvas width="190" height="282" data-src="/portrait.png" role="img" aria-label="Halftone portrait of Pascal sitting on a sport motorcycle"></canvas>
+        <noscript><style>.portrait canvas{display:none}</style><img src="/portrait.png" alt="Pascal sitting on a sport motorcycle" /></noscript>
+      </figure>
+      {me.intro.map((p) => <p class="blurb">{p}</p>)}
+      <p class="blurb">
+        {me.now} I’m available for software engineering roles starting in {me.available}. Reach me on{' '}
+        <a href={linkedin.href}>LinkedIn</a> or see my work on <a href={github.href}>GitHub</a>.
+      </p>
+    </header>
+
+    <section>
+      <h2>Experience</h2>
+      <Rows rows={experience} />
+    </section>
+
+    <section>
+      <h2>Selected work</h2>
+      <Rows rows={featured} />
+      <p class="more"><a href="/projects/">More projects<LinkIcon kind="more" /></a></p>
+    </section>
+
+    <section>
+      <h2>Recognition</h2>
+      <Rows rows={recognition} />
+    </section>
+
+    <section>
+      <h2>Education</h2>
+      <Rows rows={education} />
+    </section>
+  </main>
+</Base>
+
+<script>
+  import '../portrait'
+</script>

@@ -1,0 +1,101 @@
+---
+import Base from '../layouts/Base.astro'
+import LinkIcon from '../components/LinkIcon.astro'
+import Rows from '../components/Rows.astro'
+import { projects } from '../data'
+import { contributions } from '../github'
+
+const cal = await contributions('PascaII')
+const CELL = 12
+const WEEKDAY_GUTTER = 26
+const MONTH_GUTTER = 14
+const DOT_RADIUS_BY_LEVEL = [1, 2.4, 3.4, 4.4, 5.4]
+const MIN_LABEL_GAP = 3
+// "Sat 19 Sep 2026", with the same month abbreviations as the graph's labels
+const day = (date: string) => {
+  const part = (o: Intl.DateTimeFormatOptions) => new Date(date).toLocaleString('en', { ...o, timeZone: 'UTC' })
+  return `${part({ weekday: 'short' })} ${part({ day: 'numeric' })} ${part({ month: 'short' })} ${part({ year: 'numeric' })}`
+}
+const month = (date: string) => new Date(date).toLocaleString('en', { month: 'short', timeZone: 'UTC' })
+
+const months = (cal?.weeks ?? [])
+  .map((week, x, all) => ({ x, label: month(week[0].date), prev: x ? month(all[x - 1][0].date) : '' }))
+  .filter((m) => m.label !== m.prev)
+  .filter((m, i, all) => !(i === 0 && all[1] && all[1].x - m.x < MIN_LABEL_GAP))
+---
+
+<Base title="Projects · Pascal Bitterli" description="Projects by Pascal Bitterli: AI, systems and trading side projects.">
+  <main class="page">
+    <p class="back"><a href="/"><LinkIcon kind="back" />Back</a></p>
+    <h1>Projects</h1>
+    <Rows rows={projects.map((p) => ({ ...p, title: p.name })).sort((a, b) => b.when.localeCompare(a.when))} />
+
+    {
+      cal && (
+        <section class="graph">
+          <h2>GitHub contributions, last 12 months</h2>
+          <div class="scroll">
+            <svg
+              viewBox={`0 0 ${WEEKDAY_GUTTER + cal.weeks.length * CELL} ${MONTH_GUTTER + 7 * CELL}`}
+              role="img"
+              aria-label={`${cal.total} GitHub contributions in the last year`}
+            >
+              {months.map((m) => (
+                <text x={WEEKDAY_GUTTER + m.x * CELL} y="8">
+                  {m.label}
+                </text>
+              ))}
+              {['Mon', 'Wed', 'Fri'].map((day, i) => (
+                <text x="0" y={MONTH_GUTTER + (i * 2 + 1) * CELL + CELL / 2 + 3}>
+                  {day}
+                </text>
+              ))}
+              {cal.weeks.map((week, x) =>
+                week.map((d) => (
+                  <circle
+                    cx={WEEKDAY_GUTTER + x * CELL + CELL / 2}
+                    cy={MONTH_GUTTER + d.weekday * CELL + CELL / 2}
+                    r={DOT_RADIUS_BY_LEVEL[d.level]}
+                    stroke-width={CELL - 2 * DOT_RADIUS_BY_LEVEL[d.level]}
+                    opacity={d.level ? 1 : 0.3}
+                  >
+                    <title>{`${d.count} contribution${d.count === 1 ? '' : 's'} on ${day(d.date)}`}</title>
+                  </circle>
+                )),
+              )}
+            </svg>
+          </div>
+          <p>
+            <span class="day">{cal.total} contributions</span>
+            One dot per day, bigger = more · less{' '}
+            <svg class="legend" viewBox={`0 0 ${5 * CELL} ${CELL}`} aria-hidden="true">
+              {DOT_RADIUS_BY_LEVEL.map((r, i) => (
+                <circle cx={i * CELL + CELL / 2} cy={CELL / 2} r={r} opacity={i ? 1 : 0.3} />
+              ))}
+            </svg>{' '}
+            more · <a href="https://github.com/PascaII">github.com/PascaII</a>
+          </p>
+        </section>
+      )
+    }
+  </main>
+</Base>
+
+<script>
+  // Hovering a day shows its count in the caption. The <title> stays the no-JS tooltip and is
+  // moved into data-day here so the native tooltip doesn't pop up on top of the caption.
+  const svg = document.querySelector('.graph .scroll svg')
+  const out = document.querySelector('.graph .day')
+  if (svg && out) {
+    const total = out.textContent
+    for (const t of svg.querySelectorAll('circle > title')) {
+      t.parentElement!.dataset.day = t.textContent ?? ''
+      t.remove()
+    }
+    svg.addEventListener('pointerover', (e) => {
+      const day = (e.target as Element).closest<SVGElement>('circle')?.dataset.day
+      if (day) out.textContent = day
+    })
+    svg.addEventListener('pointerleave', () => (out.textContent = total))
+  }
+</script>

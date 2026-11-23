@@ -1,0 +1,46 @@
+---
+import '../fonts/newsreader.css'
+import '../styles.css'
+import { execSync } from 'node:child_process'
+import { me } from '../data'
+
+const { title = me.name, description = me.description } = Astro.props
+const canonical = new URL(Astro.url.pathname, Astro.site)
+// date of the last commit, not of the build: the daily scheduled rebuild would otherwise always show this month
+const lastCommit = execSync('git log -1 --format=%cI').toString().trim()
+const updated = new Date(lastCommit).toLocaleString('en', { month: 'long', year: 'numeric', timeZone: 'Europe/Zurich' })
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: me.name,
+  jobTitle: me.role,
+  url: Astro.site,
+  sameAs: me.links.map((l) => l.href),
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL('/og.jpg', Astro.site)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json" set:html={JSON.stringify(person)} />
+  </head>
+  <body>
+    <slot />
+    <footer>
+      {me.links.map((l) => <a href={l.href}>{l.label}</a>)}
+      <span class="updated">Last updated {updated}</span>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,53 @@
+---
+import LinkIcon from './LinkIcon.astro'
+
+interface Row {
+  when?: string
+  title: string
+  href?: string
+  org?: string
+  orgHref?: string
+  more?: { label: string; href: string }[]
+  note?: string
+  blurb?: string
+  stack?: string[]
+}
+interface Props {
+  rows: Row[]
+}
+const { rows } = Astro.props
+---
+
+<ul class="rows">
+  {
+    rows.map((r) => (
+      <li>
+        {r.when && <span class="when">{r.when}</span>}
+        <div>
+          {r.href ? <a href={r.href}>{r.title}</a> : <strong>{r.title}</strong>}
+          {r.org && (
+            <>
+              {', '}
+              <em class="org">{r.orgHref ? <a href={r.orgHref}>{r.org}</a> : r.org}</em>
+            </>
+          )}
+          {(r.note ?? r.blurb) && <p>{r.note ?? r.blurb}</p>}
+          {r.stack && <p class="stack">{r.stack.join(' · ')}</p>}
+          {r.more && (
+            <p class="stack">
+              {r.more.map((m, i) => (
+                <>
+                  {i > 0 && ' · '}
+                  <a href={m.href}>
+                    {m.label}
+                    <LinkIcon kind="external" />
+                  </a>
+                </>
+              ))}
+            </p>
+          )}
+        </div>
+      </li>
+    ))
+  }
+</ul>

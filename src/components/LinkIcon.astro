@@ -1,0 +1,25 @@
+---
+import MorphIcon from 'morphicons/astro'
+import { pairs, type Kind } from '../icons'
+
+interface Props {
+  kind: Kind
+}
+const { kind } = Astro.props
+---
+
+<MorphIcon icon={pairs[kind].rest} data-morph={kind} size="1.1em" strokeWidth={1.75} reducedMotion="user" />
+
+<script>
+  import { pairs, type Kind } from '../icons'
+  import type { MorphIconElement } from 'morphicons/element'
+
+  customElements.whenDefined('morph-icon').then(() => {
+    for (const el of document.querySelectorAll<MorphIconElement>('morph-icon[data-morph]')) {
+      const { rest, hover } = pairs[el.dataset.morph as Kind]
+      const link = el.closest('a')
+      for (const on of ['pointerenter', 'focus']) link?.addEventListener(on, () => el.morphTo(hover))
+      for (const off of ['pointerleave', 'blur']) link?.addEventListener(off, () => el.morphTo(rest))
+    }
+  })
+</script>

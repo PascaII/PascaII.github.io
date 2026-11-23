@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://pascaii.github.io/sitemap-index.xml
